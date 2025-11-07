@@ -1,0 +1,89 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Session;
+
+Route::get('/', function () {
+    return view('welcome');
+});
+
+// TEST SESIONES
+Route::get('/test-session', function () {
+    Session::put('test_key', 'test_value_' . time());
+    Session::save();
+    
+    $sessionId = session()->getId();
+    $data = Session::all();
+    
+    return response()->json([
+        'status' => 'Session created',
+        'session_id' => $sessionId,
+        'session_data' => $data,
+        'driver' => config('session.driver'),
+        'table' => config('session.table'),
+        'db_check' => DB::table('sessions')->where('id', $sessionId)->exists() ? 'Found in DB' : 'NOT in DB'
+    ]);
+});
+
+// TEST LOGIN AUTOMÁTICO
+Route::get('/auto-login', function () {
+    $user = \App\Models\User::where('email', 'claudiomardoneso@gmail.com')->first();
+    
+    if (!$user) {
+        return response()->json(['error' => 'User not found'], 404);
+    }
+    
+    auth()->login($user);
+    
+    return redirect('/admin')->with('success', 'Auto-logged in!');
+<?php
+
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
+
+// ==========================================================
+// TESTS Y SESIONES
+// ==========================================================
+
+Route::get('/test-session', function () {
+    $sessionId = session()->getId();
+    $testValue = session('test_key', 'NOT FOUND');
+
+    $dbSession = DB::table('sessions')->where('id', $sessionId)->first();
+
+    return response()->json([
+        'session_id' => $sessionId,
+        'test_value_from_session' => $testValue,
+        'db_session_exists' => $dbSession ? 'YES' : 'NO',
+        'db_payload_preview' => $dbSession ? substr($dbSession->payload, 0, 200) : null
+    ]);
+});
+
+// ==========================================================
+// LOGIN FORZADO (SIN MIDDLEWARE)
+// ==========================================================
+
+Route::get('/force-login', function () {
+    try {
+        $user = \App\Models\User::where('email', 'claudiomardoneso@gmail.com')->first();
+        if (!$user) {
+            return response()->json(['error' => 'Usuario no encontrado'], 404);
+        }
+
+        Auth::logout();
+        Session::flush();
+        Session::regenerate();
+        Auth::login($user, true);
+
+        return redirect('/admin');
+    } catch (\Throwable $e) {
+        return response()->json([
+            'error' => 'EXCEPCIÓN',
+            'message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine()
+        ], 500);
+    }
+});

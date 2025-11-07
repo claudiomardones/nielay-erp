@@ -1,0 +1,85 @@
+<?php
+
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Redirect;
+use App\Models\User;
+
+Route::get('/force-login', function () {
+    $user = User::where('email', 'claudiomardoneso@gmail.com')->first();
+
+    if (! $user) {
+        return response('Usuario no encontrado', 404);
+    }
+
+    // Regenera sesión limpia
+    Session::flush();
+    Auth::logout();
+
+    // Loguea y guarda inmediatamente
+    Auth::login($user, true);
+    Session::regenerate();
+
+    // 🔒 Guarda la sesión en disco ANTES de redirigir
+    Session::save();
+
+    // Redirige con cookie activa
+    return Redirect::to('/admin');
+});
+
+    return response()->json([
+        'cookies_received' => request()->cookies->all(),
+        'session_id' => session()->getId(),
+        'auth_check' => Auth::check(),
+        'auth_user' => Auth::user()?->email ?? 'NULL',
+        'session_data' => session()->all(),
+    ]);
+});
+
+use Illuminate\Support\Facades\Route;
+
+    // Cookie cruda para ver si Nginx/PHP deja pasar Set-Cookie
+    return response('OK COOKIE')
+        ->cookie(
+            name: 'cookie_test_nielay',
+            value: 'ok',
+            minutes: 60,
+            path: '/',
+            domain: '.nielay.com',   // <- tu dominio
+            secure: true,            // HTTPS
+            httpOnly: false,
+            raw: false,
+            sameSite: 'Lax'
+        );
+});
+
+    // Tocar la sesión explícitamente
+    session()->put('touch', now()->timestamp);
+    return response()->json([
+        'session_id' => session()->getId(),
+        'has_touch'  => session()->has('touch'),
+        'cookies_in' => request()->cookies->all(),
+    ]);
+})->middleware('web');
+
+use Illuminate\Support\Facades\Route;
+
+    // Firma clásica: cookie(nombre, valor, minutos, path, dominio, secure, httponly, raw, samesite)
+    return response('OK COOKIE')
+        ->cookie('cookie_test_nielay','ok',60,'/','.nielay.com',true,false,false,'Lax');
+});
+
+    session()->put('touch', now()->timestamp);
+    return response()->json([
+        'session_id' => session()->getId(),
+        'has_touch'  => session()->has('touch'),
+        'cookies_in' => request()->cookies->all(),
+    ]);
+})->middleware('web');
+
+    return response()->json([
+        'cookies_received' => request()->cookies->all(),
+        'session_id'       => session()->getId(),
+        'session_data'     => session()->all(),
+    ]);
+});

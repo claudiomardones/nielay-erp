@@ -1,0 +1,41 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+
+/*
+|--------------------------------------------------------------------------
+|--------------------------------------------------------------------------
+*/
+
+
+    // cookie(nombre, valor, minutos, path, dominio, secure, httponly, raw, samesite)
+    return response('OK COOKIE')
+        ->cookie('cookie_test_nielay','ok',60,'/','.nielay.com',true,false,false,'Lax');
+});
+
+    session()->put('touch', now()->timestamp);
+    return response()->json([
+        'session_id' => session()->getId(),
+        'has_touch'  => session()->has('touch'),
+        'cookies_in' => request()->cookies->all(),
+    ]);
+})->middleware('web');
+
+    return response()->json([
+        'cookies_received' => request()->cookies->all(),
+        'session_id'       => session()->getId(),
+        'auth_check'       => auth()->check(),
+        'auth_user'        => auth()->user()?->email ?? 'NULL',
+        'session_data'     => session()->all(),
+    ]);
+});
+
+Route::get('/debug-cookies', function () {
+    return response()->json([
+        'cookies_received' => request()->cookies->all(),
+        'session_id' => session()->getId(),
+        'auth_check' => Auth::check(),
+        'auth_user' => Auth::user()?->email ?? 'NULL',
+        'session_data' => session()->all(),
+    ]);
+});
