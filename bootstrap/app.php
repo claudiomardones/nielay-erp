@@ -14,18 +14,17 @@ return Application::configure(basePath: dirname(__DIR__))
         \App\Providers\Filament\AdminPanelProvider::class,
     ])
     ->withMiddleware(function (Middleware $middleware) {
-        // ⭐ CRÍTICO: SetTenantContext para multi-tenancy con RLS
+        // GLOBAL: Aplicar a TODAS las rutas
+        $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
+        
+        // Middleware stack web
         $middleware->web(append: [
             \App\Http\Middleware\SetTenantContext::class,
+            'throttle:60,1',
         ]);
 
-        // 🛡️ SEGURIDAD: Rate Limiting - Prevenir ataques de fuerza bruta
-        $middleware->throttleApi(60); // API: 60 requests/minuto
-        
-        // Rate limiting personalizado para rutas web
-        $middleware->web(append: [
-            'throttle:60,1', // Web: 60 requests por minuto
-        ]);
+        // Rate Limiting API
+        $middleware->throttleApi(60);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
