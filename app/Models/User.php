@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\Auditable;
 use App\Traits\TenantScoped;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
@@ -11,7 +12,7 @@ use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable implements FilamentUser
 {
-    use HasFactory, Notifiable, TenantScoped;
+    use HasFactory, Notifiable, TenantScoped, Auditable;
 
     /**
      * Campos protegidos contra mass assignment
