@@ -18,6 +18,14 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             \App\Http\Middleware\SetTenantContext::class,
         ]);
+
+        // 🛡️ SEGURIDAD: Rate Limiting - Prevenir ataques de fuerza bruta
+        $middleware->throttleApi(60); // API: 60 requests/minuto
+        
+        // Rate limiting personalizado para rutas web
+        $middleware->web(append: [
+            'throttle:60,1', // Web: 60 requests por minuto
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
