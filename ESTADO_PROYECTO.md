@@ -1,444 +1,289 @@
-# 🗄️ ESTADO REAL PROYECTO NIELAY ERP
+# ====================================
+# NIELAY IA - ESTADO DEL PROYECTO
+# Actualizado: 2025-11-16 18:45
+# ====================================
 
-**Última actualización:** 07 Noviembre 2025 20:30  
-**Versión:** 3.0 - VERIFICADO EN SERVIDOR  
-**Servidor:** vmi2780254.contaboserver.net (Contabo)
+## 🎯 CHECKPOINT ACTUAL
 
----
-
-## 🚨 ESTE ES EL ESTADO 100% REAL
-
-Verificado con comandos directos en PostgreSQL del servidor.  
-**NO ES ASPIRACIONAL - ES LO QUE EXISTE AHORA.**
+**Fase:** MVP V8 - Cobranzas
+**Último cambio:** Sistema de gestión de contexto instalado + Logout funcional
+**Próximo paso:** Implementar IntegrationAccountResource para OAuth Gmail
 
 ---
 
-## 📊 BASE DE DATOS - ESTRUCTURA REAL
+## 📊 RESUMEN EJECUTIVO
 
-### **Base de Datos:** `newenia`
-- **PostgreSQL:** 14.19
-- **Owner:** `newenia`
-- **Host:** 127.0.0.1
-- **Port:** 5432
+### Stack Tecnológico CONFIRMADO
+- **Laravel:** 11
+- **Filament:** 4.2.0 (Schema API - NO Form API)
+- **PHP:** 8.4
+- **PostgreSQL:** 16
+- **BD Local:** newenia_local
+- **BD Producción:** newenia (Contabo VPS)
+- **Ubicación Desarrollo:** C:\NIELAY\public_html\nielay-erp
+- **Servidor Producción:** vmi2780254.contaboserver.net
 
-### **Extensiones Activas:**
-- ✅ `pgcrypto` - Encriptación
-- ✅ `pg_trgm` - Búsqueda full-text
-- ✅ `vector` - pgvector para embeddings
-- ✅ `pg_stat_statements` - Métricas de queries
+### Infraestructura Existente VALIDADA
 
-### **Usuarios con Permisos:**
-- `postgres` (superuser)
-- `newenia` (owner)
-- `app_runtime` (aplicación)
-- `nielay_login` (auth)
-- `app_nielay_portal` (portal)
+#### Base de Datos (11 Schemas Operativos)
+```
+✅ newenia_global_core          (tenants, users)
+✅ newenia_security_audit        (audit_logs, audit_requests)
+✅ newenia_automation_engine     (automation_credentials, automation_executions, jobs)
+✅ newenia_document_processing   (documents, sectors)
+✅ newenia_vector_storage        (universal_embeddings)
+✅ newenia_ai_universal          (ai_providers, learning_events)
+✅ newenia_revenue_core          (usage_counters)
+✅ newenia_connectors            [schema existente]
+✅ newenia_analytics_global      [schema existente]
+✅ newenia_client_success        [schema existente]
+✅ public                        (migrations, sessions, jobs, cache)
+```
 
-### **Seguridad:**
-- ✅ RLS (Row Level Security) activo en 7 schemas
-- ✅ 20 políticas RLS configuradas
-- ✅ Variable de contexto: `app.tenant_id`
-
----
-
-## 📋 INVENTARIO COMPLETO (23 TABLAS, 8 SCHEMAS)
-
-### **1. newenia_ai_universal (2 tablas)**
-Proveedores IA y eventos de aprendizaje
-
+#### Tablas Críticas MVP Cobranzas
 ```sql
-- ai_providers_global              ← Configuración providers (OpenAI, Claude, Ollama)
-- learning_events                  ← Eventos de aprendizaje del sistema
-```
+-- Usuarios y Tenants
+newenia_global_core.users (id, tenant_id, email, name, password, role, is_active)
+newenia_global_core.tenants (id, code, name, status)
 
-**Características:**
-- RLS: ✅ 2 políticas
-- Secuencias: 2
-- Índices: 4
+-- Credenciales OAuth
+newenia_automation_engine.automation_credentials 
+(id, tenant_id, automation_code, credential_key, credential_value_encrypted)
 
----
-
-### **2. newenia_automation_engine (4 tablas)**
-Motor de automatización (n8n, jobs, credenciales)
-
-```sql
-- automation_instances             ← Instancias de automatizaciones
-- automation_templates             ← Templates reutilizables
-- processing_jobs                  ← Jobs en proceso
-- workflow_credentials             ← Credenciales para workflows
-```
-
-**Características:**
-- RLS: ✅ 2 políticas
-- Secuencias: 3
-- Índices: 9
-
----
-
-### **3. newenia_document_processing (2 tablas)**
-Documentos y sectores OCR canonizados
-
-```sql
-- source_documents                 ← Documentos fuente
-- sector_texts                     ← Textos por sector
-```
-
-**Características:**
-- RLS: ✅ 2 políticas
-- Secuencias: 2
-- Índices: 6
-
----
-
-### **4. newenia_global_core (2 tablas)**
-Tenancy y usuarios centrales - **CRÍTICO**
-
-```sql
-- tenants                          ← Clientes (multi-tenant)
-- users                            ← Usuarios del sistema
-```
-
-**Características:**
-- RLS: ❌ Sin políticas (tablas core)
-- Secuencias: 2
-- Índices: 5
-
----
-
-### **5. newenia_revenue_core (1 tabla)**
-Métricas y contadores de uso
-
-```sql
-- usage_meter                      ← Medición de uso por tenant
-```
-
-**Características:**
-- RLS: ✅ 2 políticas
-- Secuencias: 1
-- Índices: 2
-
----
-
-### **6. newenia_security_audit (2 tablas)**
-Auditoría de acciones y requests
-
-```sql
-- security_audit_trail             ← Trail completo de auditoría
-- api_request_log                  ← Log de requests API
-```
-
-**Características:**
-- RLS: ✅ 2 políticas
-- Secuencias: 1
-- Índices: 10
-
----
-
-### **7. newenia_vector_storage (1 tabla)**
-Embeddings vectoriales
-
-```sql
-- universal_embeddings             ← Vectores 1536D para RAG
-```
-
-**Características:**
-- RLS: ✅ 2 políticas
-- Secuencias: 1
-- Índices: 4
-- Extensión: pgvector activa
-
----
-
-### **8. public (9 tablas)**
-Infraestructura Laravel
-
-```sql
-- cache                            ← Cache Laravel
-- cache_locks                      ← Locks de cache
-- failed_jobs                      ← Jobs fallidos
-- job_batches                      ← Batches de jobs
-- jobs                             ← Queue de jobs
-- migrations                       ← Control de migraciones
-- password_reset_tokens            ← Tokens de reset password
-- personal_access_tokens           ← API tokens
-- sessions                         ← Sesiones de usuarios
-```
-
-**Características:**
-- RLS: ❌ Sin políticas (infraestructura)
-- Secuencias: 4
-- Índices: 16
-
----
-
-### **9. newenia_analytics_global (0 tablas)**
-Schema reservado para métricas futuras
-
-**Estado:** Vacío, preparado para expansión
-
----
-
-## 📁 ESTADO LARAVEL (ACTUAL)
-
-### **Ubicación:** `/var/www/nielay-erp`
-
-### **Laravel:** 12.36.1
-- PHP: 8.2.29
-- Composer: 2.8.12
-- Filament: v4.1.10
-- Livewire: v3.6.4
-
-### **Archivos Custom Existentes:**
-
-```bash
-app/Console/Commands/
-├── CreateSuperAdmin.php           ← Crear super admin
-├── MemoryRouteCommand.php         ← Memory Router (incompleto)
-└── NielayAutoLogin.php            ← Auto-login testing
-
-app/Services/
-└── MemoryRouterService.php        ← Servicio Memory Router básico
-
-app/Http/Controllers/Health/
-└── AuditHealthController.php      ← Health check
-
-app/Models/
-└── User.php                       ← Laravel User default
-
-app/Providers/Filament/
-└── AdminPanelProvider.php         ← Filament admin panel
-```
-
-### **Migraciones Laravel:**
-```bash
-- 0001_01_01_000000_create_users_table.php
-- 0001_01_01_000001_create_cache_table.php
-- 0001_01_01_000002_create_jobs_table.php
-```
-
-**IMPORTANTE:** Estas migraciones son de Laravel, NO de newenia.  
-Las tablas de newenia YA EXISTEN en la BD.
-
-### **Tests Actuales:**
-- Total: 4 tests
-- Pasando: 3 tests
-- Fallando: 1 test (MemoryRouteHttpTest - falta ruta 'login')
-
-### **Rutas Definidas:**
-```
-GET  /admin              ← Dashboard Filament
-GET  /admin/login        ← Login Filament
-GET  /memory/route       ← Memory Router (con errores)
-GET  /login-direct       ← Login directo
-GET  /simple-login-form  ← Form login simple
+-- Logs
+newenia_automation_engine.automation_executions
+newenia_security_audit.audit_logs
 ```
 
 ---
 
-## ⚠️ GAPS IDENTIFICADOS
+## 🏗️ ARQUITECTURA IMPLEMENTADA
 
-### **1. Desconexión Laravel ↔ BD newenia**
-- ❌ Laravel NO tiene Models para las 23 tablas de newenia
-- ❌ Solo existe `User.php` (mapea tabla Laravel public.users, NO newenia.users)
-- ❌ No existe Model para `tenants` ni para ninguna tabla newenia
-
-### **2. Filament Vacío**
-- ❌ No hay Resources en `app/Filament/Resources/`
-- ❌ Solo dashboard vacío
-- ❌ No hay CRUD para ninguna tabla de newenia
-
-### **3. Multi-tenancy Sin Implementar**
-- ❌ No existe middleware `SetTenantContext`
-- ❌ Laravel no usa la variable `app.tenant_id` de PostgreSQL
-- ❌ RLS está activo en BD pero Laravel no lo aprovecha
-
-### **4. Memory Router Incompleto**
-- ❌ Servicio básico sin funcionalidad real
-- ❌ No usa pgvector ni embeddings
-- ❌ Endpoint con errores
-
-### **5. Testing Inadecuado**
-- ❌ Solo 4 tests (debería haber 20+)
-- ❌ Sin tests para tablas newenia
-- ❌ Sin tests de integración BD
-
----
-
-## 🎯 ROADMAP - DESARROLLO INCREMENTAL
-
-### **FASE 1: FUNDACIÓN (Semana 1-2)** ⭐ AHORA
-
-**Objetivo:** Conectar Laravel con BD newenia
-
-**Tareas:**
-- [ ] **G1-DB-T01:** Configurar conexión Laravel → newenia ✅ PRIORITY 1
-- [ ] **G1-DB-T02:** Crear NielayModel base con tenant_id
-- [ ] **G1-DB-T03:** Models: Tenant, User (newenia)
-- [ ] **G1-DB-T04:** Middleware SetTenantContext
-- [ ] **G1-DB-T05:** Trait TenantScoped
-- [ ] **G1-TEST-T01:** Tests conexión BD (5 tests)
-
-**Entregable:** Laravel conectado a newenia, Models básicos funcionando
-
----
-
-### **FASE 2: FILAMENT CRUD (Semana 3-4)**
-
-**Objetivo:** Panel admin funcional
-
-**Tareas:**
-- [ ] **G2-FIL-T01:** TenantResource (CRUD completo)
-- [ ] **G2-FIL-T02:** UserResource (CRUD completo)
-- [ ] **G2-FIL-T03:** Roles y permisos
-- [ ] **G2-FIL-T04:** Dashboard con métricas
-- [ ] **G2-TEST-T01:** Tests Filament Resources (10 tests)
-
-**Entregable:** Panel admin operativo con gestión de tenants/users
-
----
-
-### **FASE 3: MEMORY ROUTER (Semana 5-6)**
-
-**Objetivo:** Búsqueda semántica con pgvector
-
-**Tareas:**
-- [ ] **G3-MR-T01:** Integración pgvector
-- [ ] **G3-MR-T02:** Servicio embeddings (OpenAI)
-- [ ] **G3-MR-T03:** Búsqueda semántica
-- [ ] **G3-MR-T04:** API endpoints funcionales
-- [ ] **G3-TEST-T01:** Tests Memory Router (8 tests)
-
-**Entregable:** Memory Router funcional
-
----
-
-### **FASE 4: AUTOMATION ENGINE (Semana 7-8)**
-
-**Objetivo:** Sistema de jobs y automatizaciones
-
-**Tareas:**
-- [ ] **G4-AUTO-T01:** Resources para automation_*
-- [ ] **G4-AUTO-T02:** Queue system configurado
-- [ ] **G4-AUTO-T03:** Templates reutilizables
-- [ ] **G4-TEST-T01:** Tests automation (10 tests)
-
-**Entregable:** Sistema de automatizaciones operativo
-
----
-
-### **FASE 5: SECURITY & AUDIT (Semana 9-10)**
-
-**Objetivo:** Auditoría completa del sistema
-
-**Tareas:**
-- [ ] **G5-SEC-T01:** Dashboard de auditoría
-- [ ] **G5-SEC-T02:** Log de requests API
-- [ ] **G5-SEC-T03:** API keys management
-- [ ] **G5-TEST-T01:** Tests security (8 tests)
-
-**Entregable:** Sistema de auditoría completo
-
----
-
-### **FASE 6: REVENUE & ANALYTICS (Semana 11-12)**
-
-**Objetivo:** Facturación y métricas
-
-**Tareas:**
-- [ ] **G6-REV-T01:** Usage meter dashboard
-- [ ] **G6-REV-T02:** Reportes de uso
-- [ ] **G6-REV-T03:** Analytics básicos
-- [ ] **G6-TEST-T01:** Tests revenue (8 tests)
-
-**Entregable:** Sistema de revenue operativo
-
----
-
-## 📝 PRÓXIMA ACCIÓN INMEDIATA
-
-### **TAREA CRÍTICA:** G1-DB-T01 - Conectar Laravel a BD newenia
-
-**Lo que vamos a hacer:**
-1. Configurar `config/database.php` con conexión 'newenia'
-2. Crear `NielayModel.php` base
-3. Crear Models: `Tenant.php` y `NeweniaUser.php`
-4. Tests de conexión
-5. Comando artisan de verificación
-
-**Resultado esperado:**
-- Laravel puede consultar tablas de newenia
-- Models funcionando
-- 5 tests nuevos pasando
-- Comando `php artisan nielay:verify-db` operativo
-
----
-
-## 🔒 REGLAS PARA DEEPAGENT
-
-### **PROHIBIDO:**
-- ❌ Modificar estructura BD (ya existe)
-- ❌ Crear migraciones para tablas newenia
-- ❌ Crear tablas nuevas
-- ❌ Modificar RLS policies
-- ❌ Asumir sin verificar
-
-### **OBLIGATORIO:**
-- ✅ Leer este archivo COMPLETO antes de cada tarea
-- ✅ Usar `Schema::hasTable()` antes de crear
-- ✅ Usar `class_exists()` antes de generar Models
-- ✅ Tests >85% coverage
-- ✅ Actualizar este archivo después de cambios
-
----
-
-## 📊 MÉTRICAS DE ÉXITO
-
-### **Estado Actual:**
-- Conexión BD: ❌ No configurada
-- Models newenia: ❌ No existen (0/23)
-- Tests: 4 (1 falla)
-- Coverage: ~40%
-- Filament: ❌ Sin Resources
-
-### **Meta Fase 1:**
-- Conexión BD: ✅ Funcionando
-- Models newenia: ✅ 3 básicos (Tenant, User, Provider)
-- Tests: 9 (todos pasando)
-- Coverage: >60%
-
-### **Meta Final:**
-- Conexión BD: ✅ Optimizada
-- Models newenia: ✅ 23/23
-- Tests: >50
-- Coverage: >85%
-- Filament: ✅ Resources completos
-
----
-
-## 🎯 ARQUITECTURA OBJETIVO
-
+### Modelos Laravel
 ```
-Laravel (nielay-erp)
-    ↓
-config/database.php ['newenia']
-    ↓
-NielayModel (base)
-    ↓
-Models específicos (Tenant, User, etc)
-    ↓
-Middleware SetTenantContext
-    ↓
-PostgreSQL newenia + RLS
-    ↓
-app.tenant_id isolation
+✅ app/Models/User.php              ($table = 'newenia_global_core.users', NO TenantScoped)
+✅ app/Models/Tenant.php            ($table = 'newenia_global_core.tenants')
+✅ app/Models/AuditLog.php          ($table = 'audit_logs')
+✅ app/Traits/Auditable.php         (trait para audit logging)
+```
+
+### Resources Filament
+```
+✅ app/Filament/Resources/UserResource.php          (Schema API 4.2)
+✅ app/Filament/Resources/AutomationCredentialResource.php
+✅ app/Filament/Resources/TenantResource.php
+```
+
+### Panel Admin
+```
+✅ app/Providers/Filament/AdminPanelProvider.php
+   - Panel ID: admin
+   - Path: /admin
+   - Brand: NIELAY IA
+   - ->profile() habilitado (logout funcional)
+   - ->spa() habilitado
 ```
 
 ---
 
-**Última actualización:** 07 Noviembre 2025 20:30  
-**Estado:** FUNDACIÓN - Listo para G1-DB-T01  
-**Siguiente:** Conectar Laravel a BD newenia
+## ✅ FUNCIONALIDADES COMPLETADAS
+
+### Módulo 1: Core System
+- [x] Login funcional
+- [x] Logout en menú de usuario (círculo con iniciales)
+- [x] UserResource con CRUD completo
+- [x] TenantResource con listado
+- [x] Multi-tenancy con RLS en PostgreSQL
+- [x] Auditoría automática en audit_logs
+- [x] Sistema de gestión de contexto
+
+### Sistema de Gestión de Contexto
+- [x] ESTADO_PROYECTO.md (este archivo)
+- [x] ACTUALIZAR_ESTADO.ps1
+- [x] VERIFICAR_INFRAESTRUCTURA.ps1
+- [x] README.md
 
 ---
 
-**FIN DEL DOCUMENTO - MANTENER ACTUALIZADO**
+## 🚧 PENDIENTES MVP V8 - COBRANZAS
+
+### Fase 1: Integración Email (Prioridad ALTA)
+- [ ] OAuth Google para Gmail
+- [ ] Lectura de emails vía IMAP
+- [ ] Almacenamiento de tokens cifrados
+- [ ] IntegrationAccountResource en Filament
+
+### Fase 2: Clasificación IA
+- [ ] Endpoint para clasificar emails
+- [ ] Integración con OpenAI/Claude
+- [ ] Dashboard de emails clasificados
+
+### Fase 3: Dashboard Cobranzas
+- [ ] Widget estadísticas emails
+- [ ] Vista de emails pendientes
+- [ ] Acciones rápidas
+
+---
+
+## 🔥 REGLAS CRÍTICAS (NUNCA VIOLAR)
+
+### Base de Datos
+```
+❌ PROHIBIDO: php artisan migrate:fresh
+❌ PROHIBIDO: DROP SCHEMA newenia_*
+❌ PROHIBIDO: Modificar tablas sin migración
+✅ PERMITIDO: php artisan migrate (solo nuevas migraciones)
+```
+
+### Modelos Eloquent
+```
+✅ SIEMPRE usar: protected $table = 'newenia_schema.tabla';
+❌ NUNCA omitir $table (Laravel usaría public.tabla)
+✅ User NO usa TenantScoped (causa problemas en CLI)
+✅ Otros modelos SÍ usan TenantScoped
+```
+
+### Filament 4.2
+```
+✅ API CORRECTA: use Filament\Schemas\Schema;
+✅ API CORRECTA: public static function schema(Schema $schema): Schema
+❌ API VIEJA: use Filament\Forms\Form;
+❌ API VIEJA: public static function form(Form $form): Form
+```
+
+### Archivos PHP
+```
+✅ SIEMPRE escribir SIN BOM:
+   $utf8NoBom = New-Object System.Text.UTF8Encoding $false
+   [System.IO.File]::WriteAllText($path, $content, $utf8NoBom)
+   
+❌ NUNCA usar: Set-Content (agrega BOM)
+❌ NUNCA usar: Out-File (agrega BOM)
+```
+
+---
+
+## 🔄 FLUJO DE DESARROLLO
+
+### Local → Producción
+```powershell
+# 1. Local: Desarrollar y probar
+php artisan serve
+# http://127.0.0.1:8000/admin
+
+# 2. Local: Commit
+git add .
+git commit -m "feat: descripción"
+git push origin main
+
+# 3. Producción: Deploy
+ssh root@vmi2780254.contaboserver.net
+cd /var/www/nielay-erp
+git pull origin main
+composer install --no-dev --optimize-autoloader
+php artisan migrate --force
+php artisan optimize:clear
+php artisan config:cache
+php artisan route:cache
+```
+
+---
+
+## 🔑 CREDENCIALES
+
+### Panel Admin Local
+```
+URL: http://127.0.0.1:8000/admin
+Email: claudiomardoneso@gmail.com
+Password: Newenia.123
+Role: superadmin
+Tenant: Nielay IA (id=6)
+```
+
+### Base de Datos Local
+```
+Host: 127.0.0.1
+Port: 5432
+Database: newenia_local
+User: postgres
+Password: Newenia.123
+```
+
+### Servidor Producción
+```
+SSH: root@vmi2780254.contaboserver.net
+Path: /var/www/nielay-erp
+BD: newenia
+Panel: http://vmi2780254.contaboserver.net/admin
+```
+
+---
+
+## 📝 HISTORIAL DE CAMBIOS
+
+### 2025-11-16 18:45
+- ✅ Sistema de gestión de contexto instalado
+- ✅ ESTADO_PROYECTO.md completado
+- ✅ Logout funcional en panel Filament
+- ✅ Scripts de verificación creados
+
+### 2025-11-16 18:00
+- ✅ Instalado logout en AdminPanelProvider
+- ✅ Confirmada versión Filament 4.2.0
+- ✅ Verificada estructura de BD (11 schemas, 43+ tablas)
+- ✅ Validado UserResource funcional
+
+---
+
+## 🎯 PRÓXIMOS PASOS INMEDIATOS
+
+1. [ ] Commit del sistema de contexto
+2. [ ] Deploy a producción para validar flujo
+3. [ ] Crear IntegrationAccountResource
+4. [ ] Implementar OAuth Google
+
+---
+
+## 🚨 PROBLEMAS CONOCIDOS
+
+### Resueltos
+- ✅ Loop infinito en menú usuario
+- ✅ BOM en archivos PHP
+- ✅ TenantScoped en User causaba count=0
+
+### Activos
+- [NINGUNO]
+
+---
+
+## 📚 DOCUMENTACIÓN RELACIONADA
+```
+C:\NIELAY\public_html\nielay-erp\
+├── ESTADO_PROYECTO.md                          ✅ ESTE ARCHIVO
+├── NIELAY_INSTRUCCIONES_V8_DEFINITIVAS.md      ✅ Instrucciones completas
+├── NIELAY_MVP_V7_FULL.txt                      ✅ Alcance MVP
+├── newenia_structure.sql                       ✅ Estructura BD
+├── ACTUALIZAR_ESTADO.ps1                       ✅ Script actualización
+├── VERIFICAR_INFRAESTRUCTURA.ps1               ✅ Script verificación
+└── README.md                                   ✅ Guía de uso
+```
+
+---
+
+## 🔄 INSTRUCCIONES DE ACTUALIZACIÓN
+
+Después de CADA cambio significativo, ejecutar:
+```powershell
+.\ACTUALIZAR_ESTADO.ps1 -Descripcion "Descripción del cambio" -ProximoPaso "Qué sigue"
+```
+
+Ejemplo:
+```powershell
+.\ACTUALIZAR_ESTADO.ps1 -Descripcion "IntegrationAccountResource creado" -ProximoPaso "Implementar OAuth Google"
+```
+
+---
+
+**ÚLTIMA ACTUALIZACIÓN:** 2025-11-16 18:45 UTC-3
+**ACTUALIZADO POR:** Script instalación completa
+**PRÓXIMA REVISIÓN:** Después de deploy en producción
