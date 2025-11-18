@@ -9,7 +9,7 @@ class AuditLog extends Model
     /**
      * Tabla asociada
      */
-    protected $table = 'audit_logs';
+   protected $table = 'newenia_security_audit.audit_logs';
 
     /**
      * Sin updated_at (solo created_at para logs)

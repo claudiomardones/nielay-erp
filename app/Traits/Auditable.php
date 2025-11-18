@@ -2,85 +2,44 @@
 
 namespace App\Traits;
 
-use App\Models\AuditLog;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 trait Auditable
 {
-    /**
-     * Boot del trait - registra eventos automáticamente
-     */
-    public static function bootAuditable()
+    protected static function bootAuditable()
     {
-        // Evento: Modelo creado
         static::created(function ($model) {
-            AuditLog::create([
-                'user_id' => Auth::id(),
-                'user_email' => Auth::user()?->email,
-                'action' => 'created',
-                'auditable_type' => get_class($model),
-                'auditable_id' => $model->getKey(),
-                'old_values' => null,
-                'new_values' => $model->getAttributes(),
-                'ip_address' => request()->ip(),
-                'user_agent' => request()->userAgent(),
-                'tenant_id' => session('tenant_id', 0),
-            ]);
+            self::logAudit('created', $model);
         });
 
-        // Evento: Modelo actualizado
         static::updated(function ($model) {
-            $changes = $model->getDirty();
-            
-            // Solo loguear si hay cambios reales
-            if (!empty($changes)) {
-                $original = $model->getOriginal();
-                
-                AuditLog::create([
-                    'user_id' => Auth::id(),
-                    'user_email' => Auth::user()?->email,
-                    'action' => 'updated',
-                    'auditable_type' => get_class($model),
-                    'auditable_id' => $model->getKey(),
-                    'old_values' => array_intersect_key($original, $changes),
-                    'new_values' => $changes,
-                    'ip_address' => request()->ip(),
-                    'user_agent' => request()->userAgent(),
-                    'tenant_id' => session('tenant_id', 0),
-                ]);
-            }
+            self::logAudit('updated', $model);
         });
 
-        // Evento: Modelo eliminado
         static::deleted(function ($model) {
-            AuditLog::create([
-                'user_id' => Auth::id(),
-                'user_email' => Auth::user()?->email,
-                'action' => 'deleted',
-                'auditable_type' => get_class($model),
-                'auditable_id' => $model->getKey(),
-                'old_values' => $model->getAttributes(),
-                'new_values' => null,
-                'ip_address' => request()->ip(),
-                'user_agent' => request()->userAgent(),
-                'tenant_id' => session('tenant_id', 0),
-            ]);
+            self::logAudit('deleted', $model);
         });
     }
 
-    /**
-     * Obtener todos los logs de auditoría de este modelo
-     */
-    public function auditLogs()
+    protected static function logAudit($event, $model)
     {
-        return $this->morphMany(AuditLog::class, 'auditable');
-    }
-
-    /**
-     * Obtener el último log de auditoría
-     */
-    public function lastAuditLog()
-    {
-        return $this->auditLogs()->latest()->first();
+        try {
+            DB::table('newenia_security_audit.audit_logs')->insert([
+                'tenant_id' => $model->tenant_id ?? 0,
+                'actor_user_id' => auth()->id(),
+                'event' => $event,
+                'ref_table' => $model->getTable(),
+                'ref_id' => $model->getKey(),
+                'meta' => json_encode([
+                    'model' => get_class($model),
+                    'changes' => $model->getDirty(),
+                    'ip' => request()->ip(),
+                    'user_agent' => request()->userAgent()
+                ]),
+                'created_at' => now()
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Audit log failed: ' . $e->getMessage());
+        }
     }
 }
